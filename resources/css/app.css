@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+/* Fuentes de nuestros archivos (¡Añadimos .jsx vital para React!) */
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.jsx';
+
+/* Estrategia de Modo Oscuro manual por clase para Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    /* Tipografía */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    /* Paleta de Colores Brand (Amarillo Premium / Gold) */
+    /* Usamos una escala que va desde un crema suave hasta un ocre profundo */
+    --color-brand-50: #fffbeb;
+    --color-brand-100: #fef3c7;
+    --color-brand-200: #fde68a;
+    --color-brand-300: #fcd34d;
+    --color-brand-400: #fbbf24;
+    --color-brand-500: #f59e0b; /* Color principal: Amarillo ámbar sofisticado */
+    --color-brand-600: #d97706;
+    --color-brand-700: #b45309;
+    --color-brand-800: #92400e;
+    --color-brand-900: #78350f;
+
+    /* Superficies (El "Negro" y Grises Neutros) */
+    /* Para un look premium, el "negro" no debe ser #000 total, sino un gris muy oscuro */
+    --color-surface-50: #ffffff;    /* Fondo Light */
+    --color-surface-100: #f4f4f5;   /* Elementos Light */
+    --color-surface-800: #18181b;   /* Tarjetas en Dark Mode (Zinc 900) */
+    --color-surface-900: #09090b;   /* Fondo principal en Dark Mode (Negro "Rich") */
+
+    /* Sombras Premium */
+    --shadow-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Aplicamos los colores de fondo base para que funcione el Modo Oscuro */
+@layer base {
+    body {
+        @apply bg-surface-50 text-slate-900 transition-colors duration-200 antialiased;
+    }
+
+    .dark body {
+        @apply bg-surface-900 text-slate-100;
+    }
+}
