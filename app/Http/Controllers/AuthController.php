@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+
 class AuthController extends Controller
 {
     public function showRegister()
@@ -67,8 +68,24 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        if (Auth::attempt($credentials)) {
+        $remember = $request->boolean('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+            if (!Auth::user()->is_active) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Tu cuenta ha sido desactivada. Por favor, contacta a tu administrador.',
+                ]);
+            }
+
+            $authUser = Auth::user();
+
+            if ($authUser->isAgent()) {
+                return redirect()->intended('/agent/kanban');
+            }
+
             $request->session()->regenerate();
+
             return redirect()->route('dashboard');
         }
 

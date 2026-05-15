@@ -8,13 +8,14 @@ use App\Http\Requests\StoreAgentRequest;
 use App\Http\Requests\UpdateAgentRequest;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate; // 1. Importamos la clase Gate
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AgentController extends Controller
 {
     public function index(Request $request)
     {
-        // 2. Usamos Gate::authorize en lugar de $this->authorize
         Gate::authorize('viewAny', Agent::class);
 
         $search = $request->input('search');
@@ -57,15 +58,35 @@ class AgentController extends Controller
     {
         Gate::authorize('create', Agent::class);
 
-        Agent::create($request->validated());
+        $tempPassword = Str::password(12, true, true, true, false);
 
-        return redirect()->route('agents.index')->with('success', 'Agente creado correctamente.');
+        $data = $request->validated();
+
+        $agentUser = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'password' => Hash::make($tempPassword),
+            'role' => User::ROLE_AGENT,
+            'organization_id' => auth()->user()->organization_id,
+            'manager_id' => $data['supervisor_id'] ?? auth()->id(), // Usamos supervisor_id de tu form
+            'is_active' => $data['status'] === 'active',
+        ]);
+
+
+        Agent::create($data);
+
+        return redirect()->route('agents.index')->with([
+            'success' => 'Agente creado y acceso al sistema habilitado correctamente.',
+            'temp_password' => $tempPassword
+        ]);
     }
 
     public function edit(Agent $agent)
     {
         Gate::authorize('update', $agent);
 
+        $agent->load('user');
         $supervisors = User::select('id', 'name')->get();
 
         return Inertia::render('Agents/Edit', [
@@ -78,7 +99,24 @@ class AgentController extends Controller
     {
         Gate::authorize('update', $agent);
 
-        $agent->update($request->validated());
+        $data = $request->validated();
+
+        // 1. Buscamos al Usuario (acceso al sistema) usando el correo ORIGINAL del agente
+        $user = User::where('email', $agent->email)->first();
+
+        // 2. Si el usuario existe, le actualizamos sus datos de acceso
+        if ($user) {
+            $user->update([
+                'name' => $data['name'],
+                'email' => $data['email'], // Se actualiza si el directivo lo cambió
+                'manager_id' => $data['supervisor_id'] ?? auth()->id(),
+                'is_active' => $data['status'] === 'active',
+                'position' => $data['specialty'] ?? null,
+            ]);
+        }
+
+        // 3. Actualizamos los datos del Agente de forma normal
+        $agent->update($data);
 
         return redirect()->route('agents.index')->with('success', 'Agente actualizado correctamente.');
     }

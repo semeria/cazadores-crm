@@ -41,6 +41,7 @@ class MemberController extends Controller
             'password' => Hash::make($password),
             'organization_id' => $request->user()->organization_id,
             'role' => 'member',
+            'position' => $request->position,
             'is_active' => true,
         ]);
 

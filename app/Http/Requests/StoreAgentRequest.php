@@ -24,7 +24,9 @@ class StoreAgentRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+
+
             'phone' => 'nullable|string|max:20',
             'specialty' => 'nullable|string|max:255',
             'status' => 'required|in:active,inactive,on_leave',

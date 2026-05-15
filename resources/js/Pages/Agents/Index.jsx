@@ -32,7 +32,7 @@ export default function Index({ agents, filters }) {
                 <form onSubmit={handleFilter} className="flex gap-4 mb-6">
                     <input
                         type="text"
-                        placeholder="Buscar por nombre, email o especialidad..."
+                        placeholder="Buscar por nombre, email o puesto..."
                         className="border p-2 rounded flex-1"
                         value={data.search}
                         onChange={(e) => setData('search', e.target.value)}
@@ -56,7 +56,7 @@ export default function Index({ agents, filters }) {
                     <thead>
                     <tr className="border-b">
                         <th className="p-3">Nombre</th>
-                        <th className="p-3">Especialidad</th>
+                        <th className="p-3">Puesto</th>
                         <th className="p-3">Estado</th>
                         <th className="p-3">Supervisor</th>
                         <th className="p-3 text-right">Acciones</th>

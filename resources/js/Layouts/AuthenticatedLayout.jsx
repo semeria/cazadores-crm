@@ -39,20 +39,27 @@ export default function AuthenticatedLayout({ children }) {
                 </div>
 
                 <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                    <Link href="/dashboard" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                        <span className="mr-3 text-lg">📊</span> Panel Operativo
-                    </Link>
-                    <Link href="/activities/kanban" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                        <span className="mr-3 text-lg">📋</span> Kanban
-                    </Link>
+                    {/* Accesible para Owner y Member */}
+                    {['owner', 'member'].includes(auth?.user?.role) && (
+                        <>
+                            <Link href="/dashboard" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                                <span className="mr-3 text-lg">📊</span> Panel Operativo
+                            </Link>
+                            <Link href="/activities/kanban" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                                <span className="mr-3 text-lg">📋</span> Kanban Global
+                            </Link>
+                            <Link href="/agents" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                                <span className="mr-3 text-lg">👥</span> Mi Flotilla (Agentes)
+                            </Link>
+                        </>
+                    )}
+
+                    {/* Accesible SOLO para el Owner */}
                     {auth?.user?.role === 'owner' && (
-                        <Link href="/members" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand-600 transition-colors">
-                            <span className="mr-3 text-lg">🛡️</span> Equipo (Members)
+                        <Link href="/members" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                            <span className="mr-3 text-lg">🛡️</span> Equipo Directivo
                         </Link>
                     )}
-                    <Link href="/agents" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                        <span className="mr-3 text-lg">👥</span> Agentes
-                    </Link>
                 </nav>
             </aside>
 

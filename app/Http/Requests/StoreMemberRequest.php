@@ -11,6 +11,7 @@ class StoreMemberRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'nullable|string|max:20',
+            'position' => 'nullable|string|max:255',
         ];
     }
 }

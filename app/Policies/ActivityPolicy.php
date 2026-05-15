@@ -14,27 +14,26 @@ class ActivityPolicy
 
     public function view(User $user, Activity $activity): bool
     {
-        if ($user->role === 'owner') {
-            return $user->organization_id === $activity->organization_id;
+        if ($user->isOwner() || $user->isAgent()) {
+            return true;
         }
 
-        return $user->id === $activity->assigned_user_id;
+        return $user->id === $activity->agent_id || $user->id === $activity->assigned_user_id;
     }
 
     public function create(User $user): bool
     {
         // Solo el owner puede crear actividades en este flujo (o podrías permitir a miembros crear las suyas)
-        return $user->role === 'owner';
+        return true;
     }
 
     public function update(User $user, Activity $activity): bool
     {
-        if ($user->role === 'owner') {
-            return $user->organization_id === $activity->organization_id;
+        if ($user->isOwner() || $user->isMember()) {
+            return true;
         }
 
-        // El member solo puede editar sus propias actividades
-        return $user->id === $activity->assigned_user_id;
+        return $user->id === $activity->agent_id || $user->id === $activity->assigned_user_id;
     }
 
     public function delete(User $user, Activity $activity): bool

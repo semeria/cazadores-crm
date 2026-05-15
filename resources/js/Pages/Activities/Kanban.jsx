@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Link, useForm, Head } from '@inertiajs/react';
+import { Link, useForm, Head, usePage } from '@inertiajs/react'; // 1. Agregamos usePage
 import AuthenticatedLayout from '../../Layouts/AuthenticatedLayout';
 import CommentTimeline from '../../Components/Activities/CommentTimeline';
 import axios from 'axios';
@@ -14,6 +14,9 @@ const STATUS_TITLES = {
 };
 
 export default function Kanban({ columns: initialColumns, users, agents }) {
+    // 2. Extraemos auth de las props globales de Inertia
+    const { auth } = usePage().props;
+
     const [columns, setColumns] = useState(initialColumns);
 
     useEffect(() => {
@@ -105,7 +108,13 @@ export default function Kanban({ columns: initialColumns, users, agents }) {
             <div className="flex justify-between items-center mb-6 px-4">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Tablero Operativo</h2>
                 <div className="flex items-center space-x-4">
-                    <Link href="/activities" className="text-sm text-slate-500 hover:text-brand-500 transition-colors">Ver como Lista</Link>
+                    {/* 3. Condicionamos la URL según el rol del usuario */}
+                    <Link
+                        href={auth?.user?.role === 'agent' ? '/agent/activities' : '/activities'}
+                        className="text-sm text-slate-500 hover:text-brand-500 transition-colors"
+                    >
+                        Ver como Lista
+                    </Link>
                     <button
                         onClick={() => openCreateModal('pending')}
                         className="bg-brand-500 text-black font-bold px-4 py-2 rounded-lg shadow-lg shadow-brand-500/20 hover:bg-brand-400 transition-all"
