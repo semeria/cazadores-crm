@@ -21,7 +21,7 @@ export default function Login() {
                 {/* Logo o Nombre de la App (Opcional, igual que en el layout) */}
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Cazadores<span className="text-brand-600 dark:text-brand-500">CRM</span>
+                        Jaeger<span className="text-brand-600 dark:text-brand-500">System</span>
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-2">Bienvenido de nuevo, ingresa tus credenciales.</p>
                 </div>
@@ -90,7 +90,7 @@ export default function Login() {
 
                     <div className="mt-8 text-center">
                         <p className="text-sm text-slate-600 dark:text-slate-400">
-                            ¿Tu empresa no usa CazadoresCRM?{' '}
+                            ¿Tu empresa no usa Jaeger System?{' '}
                             <Link href="/register" className="font-semibold text-brand-600 hover:text-brand-500 hover:underline">
                                 Crea una organización
                             </Link>
