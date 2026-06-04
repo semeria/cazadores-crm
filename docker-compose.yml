@@ -10,28 +10,40 @@ services:
       - "8000:80"
       - "5173:5173"
     volumes:
-      - ./:/var/www/html
-      - /var/www/html/vendor
+        - ./:/var/www/html
+        - vendor_data:/var/www/html/vendor
+        - node_modules_data:/var/www/html/node_modules
     depends_on:
-      - db
+        db:
+            condition: service_healthy
     networks:
       - app_network
 
   db:
-    image: mysql:8.4
-    container_name: mysql_db
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: cazadores_db
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_PASSWORD: root
-      MYSQL_USER: laravel_user
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - app_network
+      image: mysql:8.4
+      container_name: mysql_db
+      restart: unless-stopped
+
+      environment:
+          MYSQL_DATABASE: cazadores_db
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_PASSWORD: root
+          MYSQL_USER: laravel_user
+
+      healthcheck:
+          test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+          interval: 5s
+          timeout: 5s
+          retries: 20
+
+      ports:
+          - "3306:3306"
+
+      volumes:
+          - db_data:/var/lib/mysql
+
+      networks:
+          - app_network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -45,7 +57,8 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - app_network
 
@@ -55,4 +68,6 @@ networks:
     driver: bridge
 
 volumes:
-  db_data: # Este volumen asegura que los datos de MySQL no se borren si apagas el contenedor
+    db_data:
+    vendor_data:
+    node_modules_data:
