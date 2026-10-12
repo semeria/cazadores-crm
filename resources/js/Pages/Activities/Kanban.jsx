@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Link, useForm, Head, usePage } from '@inertiajs/react'; // 1. Agregamos usePage
 import AuthenticatedLayout from '../../Layouts/AuthenticatedLayout';
 import CommentTimeline from '../../Components/Activities/CommentTimeline';
+import ModalTransition from '../../Components/Transitions/ModalTransition';
 import axios from 'axios';
 
 const STATUS_TITLES = {
@@ -13,11 +14,33 @@ const STATUS_TITLES = {
     cancelled: 'Canceladas'
 };
 
+const OPEN_STATUSES = ['pending', 'in_progress', 'in_review'];
+
+const getLocalDateString = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
+
+const formatDueDate = (value) => {
+    const date = String(value).slice(0, 10);
+
+    return new Intl.DateTimeFormat('es-MX', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    }).format(new Date(`${date}T12:00:00`));
+};
+
 export default function Kanban({ columns: initialColumns, users, agents }) {
     // 2. Extraemos auth de las props globales de Inertia
     const { auth } = usePage().props;
 
     const [columns, setColumns] = useState(initialColumns);
+    const today = getLocalDateString();
 
     useEffect(() => {
         setColumns(initialColumns);
@@ -138,37 +161,55 @@ export default function Kanban({ columns: initialColumns, users, agents }) {
                             <Droppable droppableId={columnId}>
                                 {(provided) => (
                                     <div {...provided.droppableProps} ref={provided.innerRef} className="flex-1 overflow-y-auto min-h-[150px] space-y-3">
-                                        {items.map((item, index) => (
-                                            <Draggable key={item.id.toString()} draggableId={item.id.toString()} index={index}>
-                                                {(provided) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                        className="bg-white dark:bg-surface-900 p-4 rounded-lg shadow-subtle border border-slate-200 dark:border-slate-700 group hover:border-brand-500/50 transition-colors"
-                                                    >
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <div className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug">{item.title}</div>
-                                                            <button
-                                                                onClick={() => openEditModal(item)}
-                                                                className="text-slate-400 hover:text-brand-500 opacity-0 group-hover:opacity-100 transition"
-                                                            >
-                                                                ✏️
-                                                            </button>
+                                        {items.map((item, index) => {
+                                            const dueDate = item.due_date ? String(item.due_date).slice(0, 10) : null;
+                                            const isOpen = OPEN_STATUSES.includes(item.status);
+                                            const isOverdue = dueDate && isOpen && dueDate < today;
+                                            const isDueToday = dueDate && isOpen && dueDate === today;
+
+                                            return (
+                                                <Draggable key={item.id.toString()} draggableId={item.id.toString()} index={index}>
+                                                    {(provided) => (
+                                                        <div
+                                                            ref={provided.innerRef}
+                                                            {...provided.draggableProps}
+                                                            {...provided.dragHandleProps}
+                                                            className={`p-4 rounded-lg shadow-subtle border group transition-colors ${isOverdue
+                                                                ? 'bg-red-50 dark:bg-red-950/30 border-red-400 dark:border-red-500 hover:border-red-500'
+                                                                : 'bg-white dark:bg-surface-900 border-slate-200 dark:border-slate-700 hover:border-brand-500/50'}`}
+                                                        >
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <div className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug">{item.title}</div>
+                                                                <button
+                                                                    onClick={() => openEditModal(item)}
+                                                                    className="text-slate-400 hover:text-brand-500 opacity-0 group-hover:opacity-100 transition"
+                                                                >
+                                                                    ✏️
+                                                                </button>
+                                                            </div>
+                                                            {dueDate && (
+                                                                <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+                                                                    <span className={isOverdue ? 'font-semibold text-red-700 dark:text-red-300' : 'text-slate-500 dark:text-slate-400'}>
+                                                                        📅 {formatDueDate(dueDate)}
+                                                                    </span>
+                                                                    {isOverdue && <span className="rounded px-2 py-0.5 font-bold uppercase tracking-wide bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200">Vencida</span>}
+                                                                    {isDueToday && <span className="rounded px-2 py-0.5 font-bold uppercase tracking-wide bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">Vence hoy</span>}
+                                                                </div>
+                                                            )}
+                                                            <div className="flex justify-between items-center mt-4">
+                                                                <span className="text-[10px] uppercase font-bold text-slate-400 truncate max-w-[100px]">
+                                                                    {item.assignee?.name || 'Sin asignar'}
+                                                                </span>
+                                                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase
+                                                                    ${item.priority === 'urgent' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-400'}`}>
+                                                                    {item.priority}
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex justify-between items-center mt-4">
-                                                            <span className="text-[10px] uppercase font-bold text-slate-400 truncate max-w-[100px]">
-                                                                {item.assignee?.name || 'Sin asignar'}
-                                                            </span>
-                                                            <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase
-                                                                ${item.priority === 'urgent' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-400'}`}>
-                                                                {item.priority}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ))}
+                                                    )}
+                                                </Draggable>
+                                            );
+                                        })}
                                         {provided.placeholder}
                                     </div>
                                 )}
@@ -179,9 +220,12 @@ export default function Kanban({ columns: initialColumns, users, agents }) {
             </div>
 
             {/* Modal de Creación/Edición */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-start justify-center z-50 overflow-y-auto py-10 px-4">
-                    <div className="bg-white dark:bg-surface-800 p-8 rounded-2xl shadow-2xl w-full max-w-xl border border-slate-200 dark:border-slate-700">
+            <ModalTransition
+                open={isModalOpen}
+                ariaLabel={editingId ? 'Editar actividad' : 'Nueva actividad'}
+                backdropClassName="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/80 px-4 py-10 backdrop-blur-sm"
+                panelClassName="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl dark:border-slate-700 dark:bg-surface-800"
+            >
                         <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white">
                             {editingId ? 'Detalles de Actividad' : 'Nueva Actividad'}
                         </h2>
@@ -302,9 +346,7 @@ export default function Kanban({ columns: initialColumns, users, agents }) {
                                 />
                             </div>
                         )}
-                    </div>
-                </div>
-            )}
+            </ModalTransition>
         </AuthenticatedLayout>
     );
 }

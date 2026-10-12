@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Agent;
-use App\Models\User;
 use App\Http\Requests\StoreAgentRequest;
 use App\Http\Requests\UpdateAgentRequest;
-use Inertia\Inertia;
+use App\Models\Agent;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class AgentController extends Controller
 {
@@ -47,10 +47,14 @@ class AgentController extends Controller
     {
         Gate::authorize('create', Agent::class);
 
-        $supervisors = User::select('id', 'name')->get();
+        $supervisors = User::where('organization_id', auth()->user()->organization_id)
+            ->whereIn('role', [User::ROLE_OWNER, User::ROLE_MEMBER])
+            ->where('is_active', true)
+            ->select('id', 'name')
+            ->get();
 
         return Inertia::render('Agents/Create', [
-            'supervisors' => $supervisors
+            'supervisors' => $supervisors,
         ]);
     }
 
@@ -73,12 +77,11 @@ class AgentController extends Controller
             'is_active' => $data['status'] === 'active',
         ]);
 
-
         Agent::create($data);
 
         return redirect()->route('agents.index')->with([
             'success' => 'Agente creado y acceso al sistema habilitado correctamente.',
-            'temp_password' => $tempPassword
+            'temp_password' => $tempPassword,
         ]);
     }
 
@@ -87,11 +90,15 @@ class AgentController extends Controller
         Gate::authorize('update', $agent);
 
         $agent->load('user');
-        $supervisors = User::select('id', 'name')->get();
+        $supervisors = User::where('organization_id', auth()->user()->organization_id)
+            ->whereIn('role', [User::ROLE_OWNER, User::ROLE_MEMBER])
+            ->where('is_active', true)
+            ->select('id', 'name')
+            ->get();
 
         return Inertia::render('Agents/Edit', [
             'agent' => $agent,
-            'supervisors' => $supervisors
+            'supervisors' => $supervisors,
         ]);
     }
 
@@ -102,7 +109,9 @@ class AgentController extends Controller
         $data = $request->validated();
 
         // 1. Buscamos al Usuario (acceso al sistema) usando el correo ORIGINAL del agente
-        $user = User::where('email', $agent->email)->first();
+        $user = User::where('organization_id', auth()->user()->organization_id)
+            ->where('email', $agent->email)
+            ->first();
 
         // 2. Si el usuario existe, le actualizamos sus datos de acceso
         if ($user) {

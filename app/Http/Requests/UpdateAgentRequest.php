@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\User;
 
 class UpdateAgentRequest extends FormRequest
 {
@@ -26,6 +26,7 @@ class UpdateAgentRequest extends FormRequest
     {
         $user = User::where('email', $this->agent->email)->first();
         $userId = $user ? $user->id : null;
+
         return [
             'name' => 'required|string|max:255',
             'email' => [
@@ -38,7 +39,13 @@ class UpdateAgentRequest extends FormRequest
             'phone' => 'nullable|string|max:20',
             'specialty' => 'nullable|string|max:255',
             'status' => 'required|in:active,inactive,on_leave',
-            'supervisor_id' => 'nullable|exists:users,id',
+            'supervisor_id' => [
+                'nullable',
+                Rule::exists('users', 'id')->where(fn ($query) => $query
+                    ->where('organization_id', $this->user()->organization_id)
+                    ->whereIn('role', [User::ROLE_OWNER, User::ROLE_MEMBER])
+                    ->where('is_active', true)),
+            ],
             'notes' => 'nullable|string',
         ];
     }

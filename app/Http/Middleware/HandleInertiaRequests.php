@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\SubscriptionAccessService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -41,11 +42,30 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
 
+            'subscriptionAccess' => fn () => $this->subscriptionAccess($request),
+
             // 2. Compartir los mensajes flash (vital para el alert de contraseña temporal)
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
         ]);
+    }
+
+    private function subscriptionAccess(Request $request): ?array
+    {
+        $user = $request->user();
+        $organization = $user?->organization;
+
+        if (! $organization || $user->isSuperAdmin()) {
+            return null;
+        }
+
+        $access = app(SubscriptionAccessService::class)->currentStatus($organization);
+
+        return [
+            'status' => $access['status'],
+            'has_access' => $access['has_access'],
+        ];
     }
 }

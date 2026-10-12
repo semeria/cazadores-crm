@@ -26,14 +26,21 @@ fi
 echo "Instalando dependencias NPM..."
 npm install --force
 
-echo "Generando APP_KEY..."
-php artisan key:generate --force
+if ! grep -Eq '^APP_KEY=.+$' .env; then
+    echo "Generando APP_KEY local..."
+    php artisan key:generate --force
+else
+    echo "APP_KEY existente; se conserva."
+fi
 
 #echo "Limpiando cache de Laravel..."
 #php artisan optimize:clear
 
 echo "Ejecutando migraciones..."
 php artisan migrate --force
+
+echo "Asegurando organización y usuario inicial..."
+php artisan db:seed --class=InitialOrganizationSeeder --force
 
 echo "Iniciando Vite..."
 npm run dev -- --host 0.0.0.0 &

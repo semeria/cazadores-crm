@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -36,7 +36,8 @@ class AuthController extends Controller
             $org = Organization::create([
                 'name' => $validated['organization_name'],
                 // Generamos un slug único (útil si después quieres urls como app.com/acme-corp)
-                'slug' => Str::slug($validated['organization_name']) . '-' . Str::random(6),
+                'slug' => Str::slug($validated['organization_name']).'-'.Str::random(6),
+                'has_legacy_access' => false,
             ]);
 
             // Crear el Usuario Owner ligado a la Organización
@@ -47,6 +48,7 @@ class AuthController extends Controller
                 'password' => Hash::make($validated['password']),
                 'organization_id' => $org->id,
                 'role' => 'owner', // Forzamos el rol
+                'is_active' => true,
             ]);
         });
 
@@ -65,26 +67,31 @@ class AuthController extends Controller
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
         $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
-            if (!Auth::user()->is_active) {
+            $authUser = Auth::user();
+
+            if (! $authUser->is_active || ($authUser->organization_id !== null && ! $authUser->organization?->isActive())) {
                 Auth::logout();
+
                 return back()->withErrors([
-                    'email' => 'Tu cuenta ha sido desactivada. Por favor, contacta a tu administrador.',
+                    'email' => 'Tu cuenta u organización no tiene acceso activo. Contacta al equipo de soporte.',
                 ]);
             }
 
-            $authUser = Auth::user();
+            $request->session()->regenerate();
+
+            if ($authUser->isSuperAdmin()) {
+                return redirect()->route('super-admin.organizations.index');
+            }
 
             if ($authUser->isAgent()) {
                 return redirect()->intended('/agent/kanban');
             }
-
-            $request->session()->regenerate();
 
             return redirect()->route('dashboard');
         }
@@ -99,6 +106,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('login');
     }
 }

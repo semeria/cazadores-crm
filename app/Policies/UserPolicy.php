@@ -9,7 +9,7 @@ class UserPolicy
     // Solo el owner puede ver la lista de miembros
     public function viewAny(User $user): bool
     {
-        return $user->isOwner() || $user->isMember();
+        return $user->isOwner();
     }
 
     // El owner solo puede ver/editar miembros de su propia organización

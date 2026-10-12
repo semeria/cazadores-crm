@@ -1,68 +1,102 @@
 import React from 'react';
-import AuthenticatedLayout from '../Layouts/AuthenticatedLayout';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Activity, CircleCheck, Clock3, Eye, ListTodo, Plus, TriangleAlert } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import ActivityStatusSummary from '../Components/Dashboard/ActivityStatusSummary';
+import CompletionProgressCard from '../Components/Dashboard/CompletionProgressCard';
+import DashboardFilters from '../Components/Dashboard/DashboardFilters';
 import KpiCard from '../Components/Dashboard/KpiCard';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import UpcomingActivities from '../Components/Dashboard/UpcomingActivities';
+import AuthenticatedLayout from '../Layouts/AuthenticatedLayout';
 
 export default function Dashboard({ kpis, charts, upcoming, filters, role }) {
-    const COLORS = ['#6366f1', '#10B981', '#F59E0B', '#EF4444'];
+    const { auth } = usePage().props;
+    const name = auth?.user?.name?.trim().split(/\s+/)[0] || '';
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
 
     return (
         <AuthenticatedLayout>
-            <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <h2 className="text-2xl font-bold dark:text-white">
-                        {role === 'owner' ? 'Panel Organizacional' : 'Mi Resumen de Actividades'}
-                    </h2>
-                </div>
+            <Head title="Panel operativo" />
+            <div className="mx-auto max-w-[1500px] space-y-7">
+                <section className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+                    <div>
+                        <p className="text-sm font-semibold text-brand-700 dark:text-brand-400">
+                            {role === 'owner' ? 'Resumen de la organización' : 'Tu resumen operativo'}
+                        </p>
+                        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                            {greeting}{name ? `, ${name}` : ''}
+                        </h1>
+                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Actividad y fechas límite del equipo, en un solo lugar.</p>
+                    </div>
 
-                {/* KPIs: Siempre visibles, pero el valor depende de lo que mandó el controlador */}
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <KpiCard title="Total" value={kpis.total} colorClass="bg-brand-500" icon="📊" />
-                    <KpiCard title="En Progreso" value={kpis.in_progress} colorClass="bg-amber-500" icon="⚙️" />
-                    <KpiCard title="En Revisión" value={kpis.in_review} colorClass="bg-blue-500" icon="👁️" />
-                    <KpiCard title="Completadas" value={kpis.completed} colorClass="bg-emerald-500" icon="✅" />
-                    <KpiCard title="Vencidas" value={kpis.overdue} colorClass="bg-red-500" icon="⚠️" />
-                </div>
+                    <div className="flex flex-wrap gap-2">
+                        <Link href={role === 'agent' ? '/agent/kanban' : '/activities/kanban'} className="inline-flex h-11 items-center justify-center rounded-full border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-surface-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                            Ver Kanban
+                        </Link>
+                        <Link href="/quotes/create" className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-brand-500 dark:text-slate-950 dark:hover:bg-brand-400">
+                            <Plus size={17} /> Nueva cotización
+                        </Link>
+                    </div>
+                </section>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Gráficos: SOLO para el OWNER */}
+                <DashboardFilters filters={filters} />
+
+                <section aria-label="Indicadores de actividades" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+                    <KpiCard title="Total" value={kpis.total} icon={Activity} tone="brand" hint="Periodo" />
+                    <KpiCard title="Pendientes" value={kpis.pending} icon={ListTodo} tone="amber" hint="Periodo" />
+                    <KpiCard title="En progreso" value={kpis.in_progress} icon={Clock3} tone="blue" hint="Periodo" />
+                    <KpiCard title="En revisión" value={kpis.in_review} icon={Eye} tone="blue" hint="Periodo" />
+                    <KpiCard title="Completadas" value={kpis.completed} icon={CircleCheck} tone="green" hint="Periodo" />
+                    <KpiCard title="Vencidas" value={kpis.overdue} icon={TriangleAlert} tone="red" hint="Abiertas" />
+                </section>
+
+                <section className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+                    <div className="xl:col-span-4">
+                        <ActivityStatusSummary kpis={kpis} />
+                    </div>
+
+                    <div className="xl:col-span-5">
+                        {role === 'owner' ? (
+                            <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-subtle dark:border-slate-700 dark:bg-surface-800 sm:p-6">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Distribución por usuario</h2>
+                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Actividades asignadas en el periodo</p>
+                                    </div>
+                                    <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800 dark:bg-brand-900/30 dark:text-brand-300">Equipo</span>
+                                </div>
+                                {charts?.byUser?.length ? (
+                                    <div className="mt-5 h-[270px] w-full">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={charts.byUser} margin={{ top: 8, right: 8, left: -16, bottom: 8 }}>
+                                                <CartesianGrid vertical={false} stroke="#e2e8f0" strokeDasharray="4 4" />
+                                                <XAxis dataKey="name" tickLine={false} axisLine={false} stroke="#94a3b8" fontSize={11} tickMargin={10} />
+                                                <YAxis allowDecimals={false} tickLine={false} axisLine={false} stroke="#94a3b8" fontSize={11} />
+                                                <Tooltip cursor={{ fill: 'rgba(217, 119, 6, 0.08)' }} />
+                                                <Bar dataKey="total" name="Actividades" fill="#d97706" radius={[8, 8, 0, 0]} maxBarSize={48} />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                ) : (
+                                    <div className="mt-5 flex h-[270px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-slate-500 dark:bg-surface-900 dark:text-slate-400">Aún no hay actividades asignadas en este periodo.</div>
+                                )}
+                            </section>
+                        ) : (
+                            <UpcomingActivities activities={upcoming} />
+                        )}
+                    </div>
+
+                    <div className="xl:col-span-3">
+                        <CompletionProgressCard completed={kpis.completed} total={kpis.total} />
+                    </div>
+
                     {role === 'owner' && (
-                        <div className="lg:col-span-2 bg-white dark:bg-surface-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
-                            <h3 className="font-bold mb-4 dark:text-white">Distribución por Usuario</h3>
-                            <div className="h-64">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={charts.byUser}>
-                                        <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
-                                        <YAxis stroke="#94a3b8" fontSize={12} />
-                                        <Tooltip />
-                                        <Bar dataKey="total" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
+                        <div className="xl:col-span-12">
+                            <UpcomingActivities activities={upcoming} />
                         </div>
                     )}
-
-                    {/* Lista de próximas actividades: Visible para ambos (pero filtrada) */}
-                    <div className={`${role === 'owner' ? 'col-span-1' : 'col-span-3'} bg-white dark:bg-surface-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700`}>
-                        <h3 className="font-bold mb-4 dark:text-white">Próximos Vencimientos</h3>
-                        <div className="space-y-4">
-                            {upcoming.map(item => (
-                                <div key={item.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-surface-900 rounded-lg">
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-medium dark:text-white truncate">{item.title}</p>
-                                        <p className="text-xs text-slate-500">{item.due_date || 'Sin fecha'}</p>
-                                    </div>
-                                    <span className="text-xs font-bold text-brand-600 dark:text-brand-400 capitalize">
-                                        {item.status}
-                                    </span>
-                                </div>
-                            ))}
-                            {upcoming.length === 0 && (
-                                <p className="text-sm text-slate-500 text-center py-4">No hay tareas urgentes.</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                </section>
             </div>
         </AuthenticatedLayout>
     );

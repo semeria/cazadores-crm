@@ -1,7 +1,9 @@
 import React from 'react';
 import { useForm, Link, Head } from '@inertiajs/react';
+import { m, useReducedMotion } from 'motion/react';
 
 export default function Login() {
+    const shouldReduceMotion = useReducedMotion();
     const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
@@ -17,7 +19,12 @@ export default function Login() {
         <div className="min-h-screen flex items-center justify-center bg-surface-50 dark:bg-surface-900 px-4 transition-colors duration-200">
             <Head title="Iniciar Sesión" />
 
-            <div className="w-full max-w-md">
+            <m.div
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.32, ease: 'easeOut' }}
+                className="w-full max-w-md"
+            >
                 {/* Logo o Nombre de la App (Opcional, igual que en el layout) */}
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -102,7 +109,7 @@ export default function Login() {
                 <p className="text-center text-xs text-slate-400 mt-8">
                     &copy; {new Date().getFullYear()} Proyecto Cazadores. Todos los derechos reservados.
                 </p>
-            </div>
+            </m.div>
         </div>
     );
 }

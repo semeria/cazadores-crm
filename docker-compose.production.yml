@@ -1,0 +1,71 @@
+x-app-environment: &app-environment
+  APP_NAME: "${APP_NAME:-JaegerSystem CRM}"
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_KEY: "${APP_KEY:?Set APP_KEY in Coolify}"
+  APP_URL: "${APP_URL:?Set APP_URL in Coolify}"
+  APP_LOCALE: es
+  APP_FALLBACK_LOCALE: es
+  LOG_CHANNEL: stderr
+  LOG_LEVEL: info
+  TRUSTED_PROXIES: "*"
+  DB_CONNECTION: mysql
+  DB_HOST: db
+  DB_PORT: "3306"
+  DB_DATABASE: "${DB_DATABASE:?Set DB_DATABASE in Coolify}"
+  DB_USERNAME: "${DB_USERNAME:?Set DB_USERNAME in Coolify}"
+  DB_PASSWORD: "${DB_PASSWORD:?Set DB_PASSWORD in Coolify}"
+  SESSION_DRIVER: database
+  SESSION_SECURE_COOKIE: "true"
+  SESSION_HTTP_ONLY: "true"
+  SESSION_SAME_SITE: lax
+  CACHE_STORE: database
+  QUEUE_CONNECTION: sync
+  FILESYSTEM_DISK: local
+  PLATFORM_ADMIN_NAME: "${PLATFORM_ADMIN_NAME:-}"
+  PLATFORM_ADMIN_EMAIL: "${PLATFORM_ADMIN_EMAIL:-}"
+  PLATFORM_ADMIN_PHONE: "${PLATFORM_ADMIN_PHONE:-}"
+  PLATFORM_ADMIN_PASSWORD: "${PLATFORM_ADMIN_PASSWORD:-}"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    restart: unless-stopped
+    stop_grace_period: 30s
+    environment: *app-environment
+    expose:
+      - "80"
+    volumes:
+      - app_storage:/var/www/html/storage/app
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: "${DB_DATABASE:?Set DB_DATABASE in Coolify}"
+      MYSQL_USER: "${DB_USERNAME:?Set DB_USERNAME in Coolify}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:?Set DB_PASSWORD in Coolify}"
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in Coolify}"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping --host=127.0.0.1 --user=root --password=\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  mysql_data:
+  app_storage:

@@ -3,14 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'phone', 'password', 'organization_id', 'role','is_active','position', 'manager_id',])]
+#[Fillable(['name', 'email', 'phone', 'password', 'organization_id', 'role', 'is_active', 'is_super_admin', 'position', 'manager_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -25,8 +24,11 @@ class User extends Authenticatable
     }
 
     public const ROLE_ADMIN = 'admin';
+
     public const ROLE_OWNER = 'owner';
+
     public const ROLE_AGENT = 'agent';
+
     public const ROLE_MEMBER = 'member';
 
     public function organization()
@@ -62,5 +64,10 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN || $this->role === self::ROLE_OWNER;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_super_admin;
     }
 }

@@ -1,3 +1,4 @@
+# Entorno local de desarrollo. Para Coolify/producción usar docker-compose.production.yml.
 services:
   app:
     build:
@@ -21,14 +22,14 @@ services:
 
   db:
       image: mysql:8.4
-      container_name: mysql_db
+      container_name: mysql_cazadores_db
       restart: unless-stopped
 
       environment:
           MYSQL_DATABASE: cazadores_db
           MYSQL_ROOT_PASSWORD: root
           MYSQL_PASSWORD: root
-          MYSQL_USER: laravel_user
+          MYSQL_USER: cazador_user
 
       healthcheck:
           test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
@@ -47,7 +48,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin_gui
+    container_name: phpmyadmin_cazadores_gui
     restart: unless-stopped
     environment:
       PMA_HOST: db
