@@ -13,7 +13,7 @@
 
 ## Contenedores
 
-`Dockerfile` y `docker-compose.yml` son para desarrollo local. El entrypoint crea `.env` si hace falta, instala dependencias, genera `APP_KEY` solo si está vacía, ejecuta migraciones y el seeder inicial, inicia Vite y Apache. El Compose publica puertos locales para Apache, Vite, MySQL y phpMyAdmin. No uses ese stack como producción.
+`Dockerfile` y `docker-compose.yml` son para desarrollo local. El entrypoint crea `.env` si hace falta, instala o actualiza dependencias cuando cambia `composer.lock` o `package-lock.json`, genera `APP_KEY` solo si está vacía, ejecuta migraciones y el seeder inicial, inicia Vite y Apache. El Compose publica puertos locales para Apache, Vite y phpMyAdmin; MySQL se publica solo en la interfaz local del host. `DB_FORWARD_PORT` permite cambiar su puerto host. Los valores por defecto de `.env.example` son solo para desarrollo. No uses ese stack como producción.
 
 `Dockerfile.production`, `.dockerignore`, `docker-compose.production.yml` y `docker/entrypoint.production.sh` definen el stack de producción para Coolify. El Dockerfile construye assets con Node.js 22, instala dependencias de Composer sin paquetes de desarrollo y ejecuta Apache/PHP sin Node. El Compose mantiene MySQL y archivos privados en volúmenes nombrados, no publica MySQL/Vite/phpMyAdmin y expone el servicio web interno para el proxy de Coolify.
 
@@ -64,7 +64,7 @@ Los PDFs de cotización se generan bajo demanda con `barryvdh/laravel-dompdf` y 
 
 ## Herramientas y puertos
 
-El Compose local declara puertos host 8000 para Apache, 5173 para Vite, 3306 para MySQL y 8080 para phpMyAdmin. `vite.config.js` enlaza el servidor de desarrollo en `0.0.0.0`, puerto 5173, HMR en `localhost` y polling de archivos. El Compose de producción no publica puertos host para MySQL ni para la aplicación; Coolify enruta HTTPS a `app:80`.
+El Compose local declara puertos host 8000 para Apache, 5173 para Vite y 8080 para phpMyAdmin. MySQL se enlaza a `127.0.0.1` en el puerto `DB_FORWARD_PORT` (3306 por defecto). `vite.config.js` enlaza el servidor de desarrollo en `0.0.0.0`, puerto 5173, HMR en `localhost` y polling de archivos. El Compose de producción no publica puertos host para MySQL ni para la aplicación; Coolify enruta HTTPS a `app:80`.
 
 ## Pendientes de documentar
 

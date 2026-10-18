@@ -1,13 +1,14 @@
 FROM php:8.3-apache
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
     zip \
     unzip \
     git \
-    curl
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install \
     pdo_mysql \
@@ -19,7 +20,7 @@ RUN docker-php-ext-install \
     opcache
 
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y nodejs \
+    && apt-get install -y --no-install-recommends nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

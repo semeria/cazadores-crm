@@ -14,7 +14,6 @@ storage
 bootstrap/cache/*.php
 tests
 docs
-docker/entrypoint.sh
 coverage
 .phpunit.cache
 .phpunit.result.cache

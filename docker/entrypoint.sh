@@ -18,13 +18,23 @@ chmod -R 775 storage bootstrap/cache
 
 chmod 1777 /tmp
 
-if [ ! -f vendor/autoload.php ]; then
+composer_lock_hash="$(sha256sum composer.lock | cut -d ' ' -f 1)"
+installed_composer_hash="$(cat vendor/.composer-lock-hash 2>/dev/null || true)"
+
+if [ ! -f vendor/autoload.php ] || [ "$composer_lock_hash" != "$installed_composer_hash" ]; then
     echo "Instalando dependencias Composer..."
     composer install --no-interaction
+    printf '%s' "$composer_lock_hash" > vendor/.composer-lock-hash
 fi
 
-echo "Instalando dependencias NPM..."
-npm install --force
+npm_lock_hash="$(sha256sum package-lock.json | cut -d ' ' -f 1)"
+installed_npm_hash="$(cat node_modules/.package-lock-hash 2>/dev/null || true)"
+
+if [ ! -d node_modules ] || [ "$npm_lock_hash" != "$installed_npm_hash" ]; then
+    echo "Instalando dependencias NPM..."
+    npm ci
+    printf '%s' "$npm_lock_hash" > node_modules/.package-lock-hash
+fi
 
 if ! grep -Eq '^APP_KEY=.+$' .env; then
     echo "Generando APP_KEY local..."
