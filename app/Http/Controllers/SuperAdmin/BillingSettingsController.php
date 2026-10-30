@@ -22,6 +22,7 @@ class BillingSettingsController extends Controller
     {
         $data = $request->validate([
             'transfer_instructions' => ['nullable', 'string', 'max:10000'],
+            'registrations_enabled' => ['required', 'boolean'],
         ]);
 
         PlatformBillingSetting::query()->updateOrCreate(
@@ -29,6 +30,6 @@ class BillingSettingsController extends Controller
             [...$data, 'updated_by' => $request->user()->id],
         );
 
-        return back()->with('success', 'Instrucciones de transferencia actualizadas.');
+        return back()->with('success', 'Configuración de plataforma actualizada.');
     }
 }

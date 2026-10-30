@@ -25,7 +25,7 @@ La conexión usa `DB_CONNECTION` y variables `DB_*` de Laravel. `.env.example` c
 - **organization_subscriptions:** organización, plan, snapshot de precio/periodo/cupón, estado, fechas de vigencia y gracia de dos días.
 - **subscription_payments:** solicitudes de pago por transferencia manual, monto, estado y revisión por Superadmin; no contiene comprobantes.
 - **coupon_redemptions:** canjes reservados/reclamados/liberados por organización, asociados a la suscripción.
-- **platform_billing_settings:** instrucciones de transferencia editables desde el panel de plataforma.
+- **platform_billing_settings:** instrucciones de transferencia y control del registro público, editables desde `/super-admin/settings`.
 - **agents:** ficha operativa con organización, supervisor, nombre, contacto, especialidad, estado y notas. Su `id` es distinto de `users.id`.
 - **activities:** organización, usuario asignado (`assigned_user_id`), agente (`agent_id`), título, descripción, estado, prioridad, fecha límite y posición Kanban.
 - **activity_comments:** organización, actividad, autor, cuerpo y flag `is_internal`.

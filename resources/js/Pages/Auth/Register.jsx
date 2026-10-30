@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm, Link } from '@inertiajs/react';
 
-export default function Register() {
+export default function Register({ registrationsEnabled = true }) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
@@ -20,10 +20,13 @@ export default function Register() {
         <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <form onSubmit={submit} className="bg-white dark:bg-surface-800 p-8 rounded-xl shadow-subtle border border-slate-200 dark:border-slate-700 w-full max-w-md">
                 <div className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Crea tu Espacio de Trabajo</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Configura tu cuenta de administrador y tu organización.</p>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{registrationsEnabled ? 'Crea tu Espacio de Trabajo' : 'Registro no disponible'}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">{registrationsEnabled ? 'Configura tu cuenta de administrador y tu organización.' : 'El registro de organizaciones está desactivado temporalmente. Contacta al administrador.'}</p>
                 </div>
 
+                {errors.registration && <div className="mb-4 rounded-lg bg-red-50 p-3 text-center text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">{errors.registration}</div>}
+
+                {registrationsEnabled && <>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre Completo</label>
@@ -66,6 +69,7 @@ export default function Register() {
                 <button type="submit" disabled={processing} className="w-full mt-6 bg-brand-600 text-white font-medium px-4 py-2.5 rounded-lg hover:bg-brand-500 focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-colors disabled:opacity-50">
                     {processing ? 'Creando cuenta...' : 'Crear mi cuenta'}
                 </button>
+                </>}
 
                 <div className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
                     ¿Ya tienes cuenta? <Link href="/login" className="font-medium text-brand-600 hover:text-brand-500 hover:underline">Inicia sesión</Link>

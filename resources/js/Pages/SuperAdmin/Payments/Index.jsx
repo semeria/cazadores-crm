@@ -62,7 +62,7 @@ export default function Index({ payments, filters }) {
                         <h1 className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">Pagos y activaciones</h1>
                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Verifica las transferencias y activa las suscripciones manualmente.</p>
                     </div>
-                    <Link href="/super-admin/billing-settings" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-surface-800 dark:text-slate-200 dark:hover:bg-slate-700">Instrucciones de transferencia</Link>
+                    <Link href="/super-admin/settings" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-surface-800 dark:text-slate-200 dark:hover:bg-slate-700">Ajustes de plataforma</Link>
                 </div>
 
                 <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-surface-800">

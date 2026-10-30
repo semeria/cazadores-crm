@@ -62,8 +62,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/subscriptions', [SubscriptionReportController::class, 'index'])->name('subscriptions.index');
         Route::get('/subscriptions/export', [SubscriptionReportController::class, 'export'])->name('subscriptions.export');
 
-        Route::get('/billing-settings', [BillingSettingsController::class, 'edit'])->name('billing-settings.edit');
-        Route::put('/billing-settings', [BillingSettingsController::class, 'update'])->name('billing-settings.update');
+        Route::get('/settings', [BillingSettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('/settings', [BillingSettingsController::class, 'update'])->name('settings.update');
     });
 
     Route::middleware('organization')->group(function () {

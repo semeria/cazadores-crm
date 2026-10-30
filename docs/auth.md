@@ -20,7 +20,7 @@
 
 ## Registro
 
-Las rutas GET y POST `/register` son para invitados. `AuthController::register` valida nombre, correo único, teléfono, nombre de organización y contraseña confirmada de al menos ocho caracteres. En una transacción crea organización con slug y cuenta owner, luego autentica la cuenta y redirige al dashboard.
+Las rutas GET y POST `/register` son para invitados. `AuthController::register` valida nombre, correo único, teléfono, nombre de organización y contraseña confirmada de al menos ocho caracteres. En una transacción crea organización con slug y cuenta owner, luego autentica la cuenta y redirige al dashboard. El superadministrador controla el registro público desde Ajustes de plataforma; el servidor bloquea el POST cuando está desactivado y la opción afecta solo a nuevas organizaciones.
 
 ## Inicio y cierre de sesión
 
@@ -40,7 +40,7 @@ El superadministrador es una cuenta `User` marcada por `is_super_admin`, sin `or
 
 La cuenta se aprovisiona únicamente mediante el seeder explícito `PlatformSuperAdminSeeder` con variables de despliegue `PLATFORM_ADMIN_*`; no se crea en el registro público ni en cada arranque. El seeder es idempotente para una cuenta ya aprovisionada y rechaza correos pertenecientes a usuarios no-superadministradores. La contraseña debe tener al menos 12 caracteres.
 
-La administración permite consultar, buscar, editar el nombre, suspender y reactivar organizaciones. La suspensión exige motivo, conserva los datos y bloquea tanto el login como sesiones ya abiertas. Las acciones de cambio de nombre, suspensión y reactivación se registran en `organization_admin_audits`.
+La administración permite consultar, buscar, editar el nombre, suspender y reactivar organizaciones. La suspensión exige motivo, conserva los datos y bloquea tanto el login como sesiones ya abiertas. Las acciones de cambio de nombre, suspensión y reactivación se registran en `organization_admin_audits`. En Ajustes de plataforma también puede habilitar o deshabilitar el registro de nuevas organizaciones.
 
 ## Suscripciones y acceso SaaS
 

@@ -17,7 +17,7 @@ export default function PlatformAdminHeader({ user, url, darkMode, onToggleTheme
         { label: 'Cupones', href: '/super-admin/coupons', icon: BadgePercent },
         { label: 'Pagos', href: '/super-admin/payments', icon: CreditCard },
         { label: 'Suscripciones', href: '/super-admin/subscriptions', icon: ClipboardList },
-        { label: 'Ajustes', href: '/super-admin/billing-settings', icon: Settings2 },
+        { label: 'Ajustes', href: '/super-admin/settings', icon: Settings2 },
     ];
 
     return (

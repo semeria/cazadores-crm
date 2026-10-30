@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm, Link, Head } from '@inertiajs/react';
 import { m, useReducedMotion } from 'motion/react';
 
-export default function Login() {
+export default function Login({ registrationsEnabled = true }) {
     const shouldReduceMotion = useReducedMotion();
     const { data, setData, post, processing, errors } = useForm({
         email: '',
@@ -95,14 +95,14 @@ export default function Login() {
                         </button>
                     </div>
 
-                    <div className="mt-8 text-center">
+                    {registrationsEnabled && <div className="mt-8 text-center">
                         <p className="text-sm text-slate-600 dark:text-slate-400">
                             ¿Tu empresa no usa Jaeger System?{' '}
                             <Link href="/register" className="font-semibold text-brand-600 hover:text-brand-500 hover:underline">
                                 Crea una organización
                             </Link>
                         </p>
-                    </div>
+                    </div>}
                 </form>
 
                 {/* Footer simple fuera de la card */}

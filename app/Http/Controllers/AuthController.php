@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Organization;
+use App\Models\PlatformBillingSetting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,11 +16,19 @@ class AuthController extends Controller
 {
     public function showRegister()
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register', [
+            'registrationsEnabled' => PlatformBillingSetting::registrationsEnabled(),
+        ]);
     }
 
     public function register(Request $request)
     {
+        if (! PlatformBillingSetting::registrationsEnabled()) {
+            return back()->withErrors([
+                'registration' => 'El registro de organizaciones está desactivado temporalmente. Contacta al administrador.',
+            ]);
+        }
+
         // 1. Validaciones actualizadas
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -60,7 +69,9 @@ class AuthController extends Controller
 
     public function showLogin()
     {
-        return Inertia::render('Auth/Login');
+        return Inertia::render('Auth/Login', [
+            'registrationsEnabled' => PlatformBillingSetting::registrationsEnabled(),
+        ]);
     }
 
     public function login(Request $request)
